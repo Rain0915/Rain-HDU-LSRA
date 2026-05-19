@@ -15,45 +15,21 @@ Features
 自动生成日志文件
 内置 Node.js 与 Playwright 浏览器环境
 Release 解压后可直接运行
-Project Structure
-Rain-HDU-LSRA/
-│
-├─ Main.bat
-├─ README.txt
-├─ Login.bat
-├─ Start.bat
-│
-└─ HDUlib_Reserve-main/
-    │
-    ├─ node/
-    ├─ node_modules/
-    ├─ requests/
-    │   └─ default.json
-    │
-    ├─ scripts/
-    ├─ logs/
-    ├─ storageState.json
-    ├─ package.json
-    └─ reserve.js
 
-Quick Start
+**Quick Start**
 1. Download Release
 
 Download the latest release package from GitHub Releases.
 
-Extract:
-
-Rain-HDU-LSRA-v1.1.zip
 2. Run Main.bat
 
-Double click:
+Double click: Main.bat
 
-Main.bat
 3. Login
 
 Select:
 
-1. 登录系统
+ 1. 登录系统
 
 A browser window will open automatically.
 
@@ -61,20 +37,13 @@ Complete the HDU unified authentication login.
 
 After entering the library reservation page successfully, return to the terminal window.
 
-If:
-
-storageState.json
-
-is generated inside:
+If storageState.json is generated inside:
 
 HDUlib_Reserve-main
 
 the login state has been saved successfully.
 
 Reservation Workflow
-Step 1
-
-Modify reservation configuration:
 
 2. 修改预约配置
 
@@ -86,19 +55,19 @@ Duration
 Preferred room
 Preferred seat
 Backup seat range
-Step 2
+
+Step 1
 
 Check current configuration:
 
 3. 查看当前配置
-Step 3
+Step 2
 
 Start reservation:
 
 4. 开始预约
 
 The script will:
-
 display current configuration
 wait until reservation launch time
 automatically execute reservation
@@ -110,6 +79,7 @@ Keep the computer awake.
 Stable network connection is recommended.
 VPN or proxy software may interfere with login.
 If login browser closes immediately, try disabling accelerator/VPN software.
+
 Logs
 
 All runtime logs are stored in:
@@ -136,7 +106,7 @@ Chromium runtime
 
 No additional installation is required.
 
-The release package can run directly on most Windows x64 systems.
+**The release package can run directly on most Windows x64 systems.**
 
 **This project is intended for learning and personal use only.**
 
