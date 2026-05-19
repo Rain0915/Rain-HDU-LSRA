@@ -45,6 +45,7 @@ the login state has been saved successfully.
 
 Reservation Workflow
 
+
 2. 修改预约配置
 
 Supported configuration items:
@@ -60,10 +61,13 @@ Step 1
 
 Check current configuration:
 
+
 3. 查看当前配置
+
 Step 2
 
 Start reservation:
+
 
 4. 开始预约
 
@@ -105,6 +109,9 @@ Playwright
 Chromium runtime
 
 No additional installation is required.
+
+
+**Disclaimer**
 
 **The release package can run directly on most Windows x64 systems.**
 
