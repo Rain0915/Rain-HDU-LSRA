@@ -1,222 +1,143 @@
-Rain-HDU-LSRA  
+**Rain-HDU-LSRA**
+
 HDU Library Reservation Assistant
 
-Rain-HDU-LSRA 是一个基于 Playwright 的杭电图书馆座位预约辅助工具，面向汇图智舒图书馆预约系统开发。项目采用接口轮询方式进行预约，不依赖高峰期网页渲染，可有效减少 20:00 开放瞬间的页面卡顿与转圈问题。项目已集成绿色版 Node.js 与 Playwright Chromium 环境，无需额外安装 Node 或配置开发环境，解压即可使用。
+一个基于 Node.js 与 Playwright 的图书馆自动预约工具。
+本项目在原始预约脚本基础上，增加了集成式菜单终端、图形化流程管理与配置系统，适合作为直接可运行的桌面工具使用。
 
---------------------------------------------------
+Features
+集成登录、配置、预约流程
+菜单式终端交互
+自动保存登录状态
+支持修改预约日期、时间、房间、座位
+支持预约前配置确认
+自动倒计时启动
+自动生成日志文件
+内置 Node.js 与 Playwright 浏览器环境
+Release 解压后可直接运行
+Project Structure
+Rain-HDU-LSRA/
+│
+├─ Main.bat
+├─ README.txt
+├─ Login.bat
+├─ Start.bat
+│
+└─ HDUlib_Reserve-main/
+    │
+    ├─ node/
+    ├─ node_modules/
+    ├─ requests/
+    │   └─ default.json
+    │
+    ├─ scripts/
+    ├─ logs/
+    ├─ storageState.json
+    ├─ package.json
+    └─ reserve.js
 
-【项目特点】
+Quick Start
+1. Download Release
 
-- 内置 Node.js 运行环境
-- 内置 Playwright Chromium 浏览器
-- 无需配置系统环境变量
-- 支持接口轮询高速抢座
-- 支持优先座位与备用座位策略
-- 支持日志输出与结果分析
-- 支持自动倒计时启动
-- 支持移动端模拟登录
-- 支持绿色版便携运行
+Download the latest release package from GitHub Releases.
 
---------------------------------------------------
+Extract:
 
-【首次使用】
+Rain-HDU-LSRA-v1.1.zip
+2. Run Main.bat
 
-1. 解压项目
+Double click:
 
-将 Rain-HDU-LSRA.zip 解压到任意目录。
+Main.bat
+3. Login
 
-推荐位置：
-- 桌面
-- D盘
-- 文档目录
+Select:
 
-不建议放在：
-C:\Program Files
+1. 登录系统
 
---------------------------------------------------
+A browser window will open automatically.
 
-2. 登录系统
+Complete the HDU unified authentication login.
 
-双击：
+After entering the library reservation page successfully, return to the terminal window.
 
-Login.bat
-
-程序会自动打开模拟手机浏览器。
-
-随后：
-
-1. 使用学校统一身份认证登录
-2. 成功进入图书馆预约系统
-3. 返回终端窗口
-4. 按提示继续
-
-登录成功后，会自动生成：
+If:
 
 storageState.json
 
-该文件保存登录状态，请勿分享。
+is generated inside:
 
---------------------------------------------------
+HDUlib_Reserve-main
 
-【修改预约配置】
+the login state has been saved successfully.
 
-配置文件位置：
+Reservation Workflow
+Step 1
 
-HDUlib_Reserve-main\Requests\default.json
+Modify reservation configuration:
 
-可使用记事本直接编辑。
+2. 修改预约配置
 
-示例：
+Supported configuration items:
 
-{
-  "date": "latest",
-  "startTime": "12:00",
-  "durationHours": 8,
-  "categories": ["自习室"],
-  "preferredRooms": ["宋韵云图（四楼）"],
-  "fallbackRooms": "any",
-  "preferredSeat": 17,
-  "seatRange": [17, 58],
-  "preferSocket": false,
-  "requireSocket": false
-}
+Date
+Start time
+Duration
+Preferred room
+Preferred seat
+Backup seat range
+Step 2
 
---------------------------------------------------
+Check current configuration:
 
-【常用配置说明】
+3. 查看当前配置
+Step 3
 
-date                日期
-startTime           开始时间
-durationHours       使用时长
-preferredRooms      优先房间
-preferredSeat       优先座位
-seatRange           备用座位范围
-preferSocket        优先插座
-requireSocket       必须有插座
-avoidRooms          排除房间
-avoidSeats          排除座位
+Start reservation:
 
---------------------------------------------------
+4. 开始预约
 
-【日期配置】
+The script will:
 
-支持：
+display current configuration
+wait until reservation launch time
+automatically execute reservation
+generate log files
+analyze reservation result automatically
+Notes
+Do not close the terminal window during reservation.
+Keep the computer awake.
+Stable network connection is recommended.
+VPN or proxy software may interfere with login.
+If login browser closes immediately, try disabling accelerator/VPN software.
+Logs
 
-latest
-today
-tomorrow
-YYYY-MM-DD
+All runtime logs are stored in:
 
-例如：
+HDUlib_Reserve-main/logs
 
-"date": "latest"
+Main configuration file:
 
---------------------------------------------------
+requests/default.json
 
-【启动预约】
+Encoding requirement:
 
-双击：
+UTF-8
 
-Start.bat
+Otherwise Node.js may fail to parse JSON correctly.
 
-程序将：
+Included Runtime Environment
 
-1. 检查运行环境
-2. 显示当前时间
-3. 等待用户确认
-4. 自动进入倒计时
-5. 到达预约时间后启动接口轮询
-6. 自动尝试预约目标座位
+This project already includes:
 
-预约过程中：
+Node.js
+Playwright
+Chromium runtime
 
-- 请勿关闭窗口
-- 请勿让电脑睡眠
-- 请保持网络连接
+No additional installation is required.
 
---------------------------------------------------
+The release package can run directly on most Windows x64 systems.
 
-【预约逻辑】
+**This project is intended for learning and personal use only.**
 
-程序运行流程：
-
-1. 读取登录态
-2. 读取 requests 配置文件
-3. 获取目标房间
-4. 获取实时座位状态
-5. 对符合条件的座位进行评分
-6. 自动尝试提交预约
-7. 输出预约结果
-
---------------------------------------------------
-
-【日志系统】
-
-日志目录：
-
-HDUlib_Reserve-main\logs
-
-例如：
-
-run-20260518-195930.log
-
-程序结束后：
-
-- 成功时显示预约座位信息
-- 失败时显示关键错误信息
-
-完整日志可用于问题排查。
-
---------------------------------------------------
-
-【当前默认策略】
-
-- 区域：宋韵云图（四楼）
-- 优先座位：17
-- 备用座位：18~58
-- 使用时长：8小时
-- 开始时间：12:00
-- 开放前约2秒开始轮询
-- 默认轮询间隔：700ms
-- 最大轮询时间：45秒
-
---------------------------------------------------
-
-【注意事项】
-
-- 本项目仅供学习与个人使用
-- 请合理使用预约系统资源
-- 不建议过高频率请求接口
-- 请勿共享个人登录状态文件
-- 部分学校可能会更新接口结构
-- 首次运行建议先观察日志输出
-
---------------------------------------------------
-
-【常见问题】
-
-1. 双击无反应
-
-请确认：
-- 已完整解压项目
-- 未被杀毒软件隔离
-- Windows允许执行bat文件
-
---------------------------------------------------
-
-2. 登录失效
-
-重新运行：Login.bat
-即可重新生成登录态。
-
---------------------------------------------------
-
-3. 找不到座位
-
-可能原因：
-- 当前日期未开放
-- 目标座位已被预约
-- 配置条件过于严格
-
-建议适当扩大：seatRange范围。
---------------------------------------------------
+**Please comply with relevant school regulations and platform policies.**
