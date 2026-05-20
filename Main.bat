@@ -1,4 +1,4 @@
-# Main.bat（v1.1修正版）
+# Main.bat（v1.2修正版）
 
 ```bat
 @echo off
@@ -430,7 +430,7 @@ echo.
 echo ==================================================
 echo.
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$target = Get-Date -Hour 19 -Minute 59 -Second 55; while($true){ $now = Get-Date; $left = $target - $now; if($left.TotalSeconds -le 0){ break }; Clear-Host; Write-Host '=================================================='; Write-Host ''; Write-Host '      HDU Library Reservation Assistant'; Write-Host ''; Write-Host '=================================================='; Write-Host ''; Write-Host ('当前时间：' + $now.ToString('HH:mm:ss')); Write-Host ''; Write-Host ('距离启动还有：' + $left.ToString('hh\\:mm\\:ss')); Write-Host ''; Write-Host '脚本将在指定时间自动启动...'; Start-Sleep -Milliseconds 500 }"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$target = Get-Date -Hour 19 -Minute 59 -Second 55; while($true){ $now = Get-Date; $left = $target - $now; if($left.TotalSeconds -le 0){ break }; Clear-Host; Write-Host '=================================================='; Write-Host ''; Write-Host '      HDU Library Reservation Assistant'; Write-Host ''; Write-Host '=================================================='; Write-Host ''; Write-Host ('当前时间：' + $now.ToString('HH:mm:ss')); Write-Host ''; Write-Host ('距离启动还有：' + $left.ToString('hh\:mm\:ss')); Write-Host ''; Write-Host '脚本将在指定时间自动启动...'; Start-Sleep -Milliseconds 500 }"
 
 cls
 
