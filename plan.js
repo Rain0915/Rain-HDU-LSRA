@@ -1,34 +1,98 @@
-import { chromium, devices } from 'playwright';
-import { readFile } from 'node:fs/promises';
-import { createInterface } from 'node:readline/promises';
-import { stdin as input, stdout as output } from 'node:process';
-import { fileURLToPath } from 'node:url';
+import {
+  buildBookingParams,
+  createApiContext,
+  createLogger,
+  DateUnavailableError,
+  extractRooms,
+  formatDate,
+  formatDateTime,
+  getCategories,
+  getOrderInfo,
+  parseArgs,
+  readJson,
+  searchSeats,
+  scoreCandidates,
+  selectCategories,
+  writeJson
+} from './lib.js';
 
-const config = JSON.parse(await readFile(new URL('../config.json', import.meta.url), 'utf8'));
-const device = devices['iPhone 13'];
+const config = await readJson(new URL('../config.json', import.meta.url));
+const args = parseArgs();
+const requestUrl = args.values.request
+  ? new URL(args.values.request, `file://${process.cwd()}/`)
+  : new URL('../requests/default.json', import.meta.url);
+const req = await readJson(requestUrl);
+const logger = createLogger('plan');
+const api = await createApiContext();
+const onDateUnavailable = req.onDateUnavailable ?? config.onDateUnavailable ?? 'fail_fast';
 
-const browser = await chromium.launch({
-  headless: false,
-  slowMo: config.slowMo ?? 50
-});
+try {
+  const categories = selectCategories(await getCategories(api, logger, config), req, config);
+  const allCandidates = [];
+  const scans = [];
 
-const context = await browser.newContext({
-  ...device,
-  locale: 'zh-CN',
-  timezoneId: config.timezone ?? 'Asia/Shanghai'
-});
+  for (const category of categories) {
+    const orderInfo = await getOrderInfo(api, category, logger, config);
+    const booking = buildBookingParams(orderInfo, category, req, config);
+    if (booking.date?.fallbackApplied) {
+      await logger.log([
+        `请求日期 ${booking.date.dateSpec} (${formatDate(booking.date.requestedDateEpoch, config.timezone)}) 当前不可预约。`,
+        `已按配置降级到最新开放日期：${formatDate(booking.date.dateEpoch, config.timezone)}。`
+      ].join(' '));
+    }
+    const searchData = await searchSeats(api, booking, logger, config);
+    const rooms = extractRooms(searchData, category);
+    const candidates = scoreCandidates(rooms, req, config);
+    scans.push({
+      category,
+      booking: {
+        beginTime: booking.beginTime,
+        duration: booking.duration,
+        label: formatDateTime(booking.beginTime, config.timezone)
+      },
+      rooms: rooms.length,
+      candidates: candidates.length
+    });
+    for (const candidate of candidates) allCandidates.push({ ...candidate, booking });
+  }
 
-const page = await context.newPage();
-await page.goto(config.url, { waitUntil: 'domcontentloaded' });
+  allCandidates.sort((a, b) => b.score - a.score || Number(a.seat.title) - Number(b.seat.title));
+  const top = allCandidates.slice(0, Number(args.values.limit ?? 20)).map((candidate, index) => ({
+    rank: index + 1,
+    score: candidate.score,
+    category: candidate.room.category.name,
+    room: candidate.room.title,
+    seat: candidate.seat.title,
+    seatId: candidate.seat.id,
+    hasSocket: Boolean(candidate.seat.have_socket),
+    time: formatDateTime(candidate.booking.beginTime, config.timezone),
+    durationHours: candidate.booking.duration / 3600
+  }));
 
-console.log('\n请在打开的浏览器里完成学校统一身份认证。');
-console.log('登录成功并回到预约系统页面后，回到这个终端按回车保存登录态。\n');
+  await writeJson(new URL('../data/latest-plan.json', import.meta.url), {
+    plannedAt: new Date().toISOString(),
+    request: req,
+    scans,
+    top
+  });
 
-const rl = createInterface({ input, output });
-await rl.question('已完成登录后按回车继续...');
-rl.close();
-
-await context.storageState({ path: fileURLToPath(new URL('../storageState.json', import.meta.url)) });
-console.log('\n已保存登录态到 storageState.json。');
-
-await browser.close();
+  if (!top.length) {
+    await logger.log('没有找到符合条件的可用座位。');
+  } else {
+    await logger.log(`推荐前 ${top.length} 个座位：`);
+    for (const item of top.slice(0, 10)) {
+      await logger.log(`#${item.rank} ${item.room} ${item.seat}号 ${item.hasSocket ? '带插座' : '无插座'} score=${item.score}`);
+    }
+  }
+  await logger.log('已保存规划结果：data/latest-plan.json');
+} catch (error) {
+  if (error instanceof DateUnavailableError || error.code === 'DATE_UNAVAILABLE') {
+    await logger.log(error.message);
+    await logger.log(`onDateUnavailable=${onDateUnavailable}，已停止规划。`);
+  } else {
+    await logger.log(`规划异常：${error.stack || error.message}`);
+  }
+  process.exitCode = 1;
+} finally {
+  await api.dispose();
+}
